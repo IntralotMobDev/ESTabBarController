@@ -83,6 +83,19 @@ open class ESTabBar: UITabBar {
 
     internal weak var customDelegate: ESTabBarDelegate?
     
+    private lazy var bottomPadding: CGFloat = {
+        // iPhoneX fix
+        if #available(iOS 11.0, *),
+            let window = UIApplication.shared.keyWindow {
+            return window.safeAreaInsets.bottom
+        } else if UIDevice.current.userInterfaceIdiom == .phone &&
+            UIScreen.main.nativeBounds.height == 2436 {
+            return 34.0
+        }
+        
+        return 0
+    }()
+    
     /// tabBar中items布局偏移量
     public var itemEdgeInsets = UIEdgeInsets.zero
     /// 是否设置为自定义布局方式，默认为空。如果为空，则通过itemPositioning属性来设置。如果不为空则忽略itemPositioning,所以当tabBar的itemCustomPositioning属性不为空时，如果想改变布局规则，请设置此属性而非itemPositioning。
@@ -229,7 +242,7 @@ internal extension ESTabBar /* Layout */ {
                 break
             }
             let width = bounds.size.width - itemEdgeInsets.left - itemEdgeInsets.right
-            let height = bounds.size.height - y - itemEdgeInsets.bottom
+            let height = bounds.size.height - y - itemEdgeInsets.bottom - bottomPadding
             let eachWidth = itemWidth == 0.0 ? width / CGFloat(containers.count) : itemWidth
             let eachSpacing = itemSpacing == 0.0 ? 0.0 : itemSpacing
             
